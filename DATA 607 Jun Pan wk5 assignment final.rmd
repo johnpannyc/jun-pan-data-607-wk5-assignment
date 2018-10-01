@@ -1,0 +1,123 @@
+---
+title: "Jun Pan DATA 607 wk5 assignment final.rmd"
+author: "Jun Pan"
+date: "September 28, 2018"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+write csv file
+```{r}
+library(dplyr)
+library(readr)
+library(tidyr)
+library(knitr)
+library(data.table)
+```
+```{r}
+flight = rbind(c("Airline","Status","Los Angeles", "Phoenix", "San Diego", "San Francisco", "Seattle"),
+                c("ALASKA", "ontime", "497","221","212","503","1841"),
+                c("ALASKA", "delayed", "62","12","20","102","305"),
+                c("AM WEST", "ontime", "694", "4840","383","320","201"),
+                c("AM WEST", "delayed", "117","415","65","129","61"))
+flight = data.frame(flight)
+```
+
+
+```{r}
+flight
+```
+
+```{r}
+write.csv(flight, file = "flight.csv")
+```
+
+```{r}
+flight <- read.csv(file="C:/Users/tbao/Desktop/CUNY MSDS notes/607/Week 5/week 5 assignment/flight.csv")
+```
+
+```{r}
+flight
+```
+tidy data
+```{r}
+library(tidyr)
+```
+
+```{r}
+airlines_transform1 <- tidyr::gather(flight, "city", "count", 3:7)
+```
+
+
+display
+```{r}
+kable(airlines_transform1, format="markdown")
+```
+
+
+```{r}
+airlines_transform2 <- tidyr::spread(airlines_transform1, Status, Count)
+```
+
+```{r}
+kable(airlines_transform2, format="markdown")
+```
+The following data show the maxium, minum, average, standard deviation, median and quatile of delayed flight 
+```{r}
+delay_summary <- airlines_transform2 %>% dplyr::group_by(Airline) %>% 
+  dplyr::summarise(max=max(delayed), 
+                   min=min(delayed),
+                   avg=mean(delayed),
+                   sd_delay=sd(delayed),
+                   median=median(delayed),
+                   IQR=IQR(delayed))
+#display
+kable(delay_summary, format="markdown")
+```
+
+Create separate data.frames for Alaska Airlines and AM_West Airlines.
+```{r}
+Alaska <- airlines_transform2 %>% filter(Airline == 'ALASKA')
+AMWest <- airlines_transform2 %>% filter(Airline == 'AMWEST')
+```
+
+```{r}
+Alaska %>%
+  arrange(desc(delayed))
+```
+The above table shows that Seattle has the most delayed fight counts in Alaska airline.
+
+
+```{r}
+AMWest %>%
+  arrange(desc(delayed))
+```
+The above table shows the descending order by counts for delayed flights, we can see phoenix has the most delayed fight by AMWEST
+
+```{r}
+library(ggplot2)
+```
+
+AM West delayed counts by city
+```{r}
+AMWestDelays<-ggplot(data=AMWest, aes(x=City, y=delayed)) +
+  geom_bar(stat="identity") + 
+  geom_bar(stat="identity", color="blue", fill="white")
+AMWestDelays
+```
+
+
+Alasak airline delayed fight counts by cities
+```{r}
+AlaskaDelays<-ggplot(data=Alaska, aes(x=City,y=delayed)) +
+  geom_bar(stat="identity") + 
+  geom_bar(stat="identity", color="Red", fill="white")
+AlaskaDelays
+```
+
+
